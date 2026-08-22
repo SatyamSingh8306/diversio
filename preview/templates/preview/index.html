@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HRIS Import Preview</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text: #1a202c;
+      --text-muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+      --danger-text: #b91c1c;
+      --warn-text: #b45309;
+      --ok: #047857;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+
+    main { max-width: 960px; margin: 0 auto; }
+
+    header {
+      margin: -2.5rem -1.5rem 1.75rem;
+      padding: 1.75rem 2rem 1.5rem;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+    }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+    header .subtitle {
+      color: rgba(255, 255, 255, 0.85);
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    form {
+      margin-bottom: 1.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    form input[type="file"] {
+      flex: 1 1 320px;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    form input[type="file"]::file-selector-button {
+      margin-right: 0.85rem;
+      padding: 0.45rem 0.9rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      background: var(--surface-alt);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    form input[type="file"]::file-selector-button:hover { background: #eef2f7; }
+
+    button {
+      padding: 0.55rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    button:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .error-box {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger-text);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      margin: 0 0 1rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .stat {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1.1rem;
+      min-width: 150px;
+      flex: 1 1 150px;
+    }
+    .stat .num { font-size: 1.7rem; font-weight: 600; line-height: 1.1; color: var(--text); }
+    .stat .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat.alert .num { color: var(--danger-text); }
+    .stat.ok .num { color: var(--ok); }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.9rem;
+      background: var(--surface);
+    }
+    thead th {
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border-strong);
+      border-top: none;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    th, td {
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr:hover { background: #fafbfd; }
+    tbody tr:last-child td { border-bottom: none; }
+    td.row-num { color: var(--text-muted); font-variant-numeric: tabular-nums; width: 1%; white-space: nowrap; }
+
+    .err { color: var(--danger-text); }
+    .warn { color: var(--warn-text); }
+    .muted { color: var(--text-muted); font-size: 0.85rem; }
+    .empty { color: var(--text-muted); font-style: italic; margin: 0; }
+    .pill {
+      display: inline-block;
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85em;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.05rem 0.4rem;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>HRIS Import Preview</h1>
+      <p class="subtitle">Upload an HRIS CSV to inspect the data before it is written to the platform. Nothing is persisted.</p>
+    </header>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="csv_file" accept=".csv,text/csv" required>
+      <button type="submit">Preview</button>
+    </form>
+
+    {% if error %}
+      <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+      <div class="card">
+        <h2>Summary</h2>
+        <div class="stat-grid">
+          <div class="stat"><div class="num">{{ result.total_rows }}</div><div class="label">Source rows</div></div>
+          <div class="stat ok"><div class="num">{{ result.accepted_employees|length }}</div><div class="label">Employees accepted</div></div>
+          <div class="stat {% if result.validation_errors %}alert{% endif %}"><div class="num">{{ result.validation_errors|length }}</div><div class="label">Validation errors</div></div>
+          <div class="stat"><div class="num">{{ result.root_employees|length }}</div><div class="label">Root employees</div></div>
+          <div class="stat"><div class="num">{{ result.managers|length }}</div><div class="label">Managers</div></div>
+          <div class="stat {% if result.cyclic_employees %}alert{% endif %}"><div class="num">{{ result.cyclic_employees|length }}</div><div class="label">In reporting cycles</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Validation errors</h2>
+        {% if result.validation_errors %}
+          <table>
+            <thead><tr><th>Source row</th><th>Problem</th></tr></thead>
+            <tbody>
+              {% for err in result.validation_errors %}
+                <tr><td class="row-num">{{ err.source_row }}</td><td class="err">{{ err.message }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}<p class="empty">No validation errors.</p>{% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Root employees (no manager)</h2>
+        {% if result.root_employees %}
+          <table>
+            <thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th></tr></thead>
+            <tbody>
+              {% for e in result.root_employees %}
+                <tr><td><code>{{ e.employee_id }}</code></td><td>{{ e.employee_name }}</td><td>{{ e.email }}</td><td>{{ e.department }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}<p class="empty">No root employees.</p>{% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Managers and direct-report counts</h2>
+        {% if result.managers %}
+          <table>
+            <thead><tr><th>Employee ID</th><th>Name</th><th>Department</th><th>Direct reports</th></tr></thead>
+            <tbody>
+              {% for m in result.managers %}
+                <tr><td><code>{{ m.employee.employee_id }}</code></td><td>{{ m.employee.employee_name }}</td><td>{{ m.employee.department }}</td><td><span class="pill">{{ m.direct_report_count }}</span></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}<p class="empty">No managers.</p>{% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Employees in reporting cycles</h2>
+        {% if result.cyclic_employees %}
+          <table>
+            <thead><tr><th>Employee ID</th><th>Name</th><th>Email</th></tr></thead>
+            <tbody>
+              {% for e in result.cyclic_employees %}
+                <tr><td><code>{{ e.employee_id }}</code></td><td>{{ e.employee_name }}</td><td>{{ e.email }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}<p class="empty">No reporting cycles detected.</p>{% endif %}
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>
