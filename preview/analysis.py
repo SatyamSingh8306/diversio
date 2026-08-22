@@ -70,10 +70,6 @@ class AnalysisResult:
     cyclic_employees: list
 
 
-# ---------------------------------------------------------------------------
-# Parsing / normalization
-# ---------------------------------------------------------------------------
-
 def _normalize_row(raw: dict) -> dict:
     """Trim every value; lowercase email and manager_email; keep IDs case-sensitive."""
     return {
@@ -113,10 +109,6 @@ def parse_csv(file_content: bytes):
         rows.append((line_no, _normalize_row(raw)))
     return rows
 
-
-# ---------------------------------------------------------------------------
-# Identity validation
-# ---------------------------------------------------------------------------
 
 def validate_identity(rows):
     """Return Employee objects with identity validity marked.
@@ -175,10 +167,6 @@ def validate_identity(rows):
         )
     return employees
 
-
-# ---------------------------------------------------------------------------
-# Manager resolution
-# ---------------------------------------------------------------------------
 
 def resolve_managers(employees):
     """Resolve each accepted employee's manager reference.
@@ -255,10 +243,6 @@ def resolve_managers(employees):
             e.manager = None
 
 
-# ---------------------------------------------------------------------------
-# Cycle detection
-# ---------------------------------------------------------------------------
-
 def find_cyclic_employees(employees):
     """Return the set of employee_ids that are members of a reporting cycle.
 
@@ -283,7 +267,6 @@ def find_cyclic_employees(employees):
             chain.append(cur)
             cur = cur.manager
         if cur is not None and state.get(cur.employee_id, 0) == 1:
-            # cur is somewhere in the current chain -> cycle from cur onward
             in_cycle = False
             for node in chain:
                 if node is cur:
@@ -295,10 +278,6 @@ def find_cyclic_employees(employees):
 
     return cyclic
 
-
-# ---------------------------------------------------------------------------
-# Top-level analysis
-# ---------------------------------------------------------------------------
 
 def analyze(file_content: bytes) -> AnalysisResult:
     """Run the full parse -> validate -> resolve -> analyze pipeline."""
